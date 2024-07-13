@@ -1,0 +1,30 @@
+[project]
+name = "update-pyproject"
+description = 'A tool to update dependencies in pyproject.toml'
+readme = "README.md"
+requires-python = ">=3.11"
+keywords = []
+authors = [
+    { name = "Víðir Valberg Guðmundsson", email = "valberg@orn.li" },
+]
+version = "0.0.1"
+
+[project.scripts]
+update-pyproject = "update_pyproject:main"
+
+[tool.ruff]
+target-version = "py312"
+extend-exclude = [
+    ".git",
+    "__pycache__",
+]
+line-length = 120
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    "T201",  # Print statements
+]
+
+[tool.ruff.lint.isort]
+force-single-line = true
