@@ -16,7 +16,8 @@ class Package:
     name: str
     version: str | None
     extras: list[str]
-    latest_version: str | None = field(init=False)
+    delimiter: str
+    latest_version: str | None = field(init=False, default=None)
 
     @classmethod
     def from_string(cls, string: str) -> "Package":
@@ -24,8 +25,21 @@ class Package:
 
         The string can be in the format `package_name[extra1,extra2]==version`.
         """
+        # find out what delimiter to use
+        possible_delimiters = ("==", ">=", "<=", "~=")
+
+        delimiter: str | None = None
+
+        for possible_delimiter in possible_delimiters:
+            if possible_delimiter in string:
+                delimiter = possible_delimiter
+                break
+
+        if not delimiter:
+            delimiter = "=="
+
         # split the string into package and version delimited by "=="
-        package_parts = string.split("==")
+        package_parts = string.split(delimiter)
         if len(package_parts) > 1:
             package_name, version = package_parts
         else:
@@ -41,7 +55,7 @@ class Package:
             package_name, extras = package_name_parts
             # remove the "]" from the extras
             extras = extras[:-1].split(",")
-        return cls(name=package_name, version=version, extras=extras)
+        return cls(name=package_name, version=version, extras=extras, delimiter=delimiter)
 
     def get_latest_version(self) -> str:
         """Get the latest version of the package from PyPI."""
@@ -63,7 +77,7 @@ class Package:
         extras_string = ""
         if self.extras:
             extras_string = f"[{','.join(self.extras)}]"
-        return f"{self.name}{extras_string}=={self.version}"
+        return f"{self.name}{extras_string}{self.delimiter}{self.version}"
 
     def updated_string(self) -> str:
         """Return the package string with the latest version."""
@@ -135,3 +149,7 @@ def main() -> None:
 
     args = parser.parse_args()
     check_for_updates(pyproject_path=args.path, update_file=args.update)
+
+
+if __name__ == "__main__":
+    main()
